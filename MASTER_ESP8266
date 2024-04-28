@@ -1,0 +1,75 @@
+#include <Wire.h>
+
+#define SLAVE_ADDRESS 9
+
+// MASTER = ESP8266
+// SLAVE = ARDUINO
+
+byte msg_counter = 0;
+
+const byte data_send = 7;
+const byte data_request = 3;
+
+byte data[data_send]; // Array zur Speicherung der Werte
+
+byte send1 = 11; 
+byte send2 = 22;
+byte send3 = 33;
+byte send4 = 44;
+byte send5 = 55;
+byte send6 = 66;
+
+void setup() {
+  Wire.begin(D5, D6); // D5 (SDA) und D6 (SCL) für I2C
+  Serial.begin(9600);
+}
+
+void loop() {
+
+  Serial.println("Send");
+ 
+  // Werte in das Datenarray schreiben
+  data[0] = send1;
+  data[1] = send2;
+  data[2] = send3;
+  data[3] = send4;
+  data[4] = send5;
+  data[5] = send6;
+  data[6] = msg_counter;
+
+  // Daten an den Bus senden
+  Wire.beginTransmission(SLAVE_ADDRESS);
+  Wire.write(data, sizeof(data));
+  Wire.endTransmission();
+
+  delay(1000);
+
+  // Sende eine Anfrage an den Slave
+  Serial.println("Request");
+
+  Wire.requestFrom(SLAVE_ADDRESS, data_request); // Fordere X Bytes vom Slave an
+  
+  while(Wire.available() < data_request) {
+    // Warte, bis alle Bytes empfangen wurden
+    delay(1);
+  }
+  
+  int i = 0;
+  while(Wire.available()) {
+    // Empfange die Daten vom Slave
+    msg_counter++;
+    int receivedValue = Wire.read();
+    Serial.print("Value ");
+    Serial.print(i);
+    Serial.print(": ");
+    Serial.println(receivedValue);
+    i++;
+  }
+
+  delay(1000); 
+
+}
+
+
+
+
