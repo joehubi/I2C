@@ -1,0 +1,87 @@
+#include <Wire.h>
+
+#define SLAVE_ADDRESS 9
+
+// MASTER = ESP8266
+// SLAVE = ARDUINO
+
+const byte data_read = 7;
+byte msg_counter = 0;
+byte send1 = 88;
+byte send2 = 99;
+
+byte receive1 = 0;
+byte receive2 = 0;
+byte receive3 = 0;
+byte receive4 = 0;
+byte receive5 = 0;
+byte receive6 = 0;
+
+void setup() {
+  Wire.begin(SLAVE_ADDRESS); // I2C default nur auf SDA und SCL Pin's des Arduino
+  Wire.onReceive(receiveEvent); // MASTER schickt Daten an SLAVE
+  Wire.onRequest(requestEvent); // MASTER fordert Daten an SLAVE
+  Serial.begin(9600);
+}
+
+void loop() {
+  // Warte auf Daten von der Master
+  delay(200);
+}
+
+void receiveEvent(int bytes) {
+  Serial.println("Data RECEIVE from MASTER");
+
+  // Stelle sicher, dass die richtige Anzahl an Bytes empfangen wurde
+  if (bytes == data_read) {
+    byte data[data_read]; // Array zur Speicherung der empfangenen Daten
+
+    // Lese die empfangenen Daten in das Array
+    for (int i = 0; i < bytes; i++) {
+      data[i] = Wire.read();
+    }
+
+    // Werte aus dem Array auslesen und anzeigen
+    receive1 = data[0];
+    receive2 = data[1];
+    receive3 = data[2];
+    receive4 = data[3];
+    receive5 = data[4];
+    receive6 = data[5];
+    msg_counter = data[6];
+    
+    // Zeige die Werte im Serial Monitor an
+    Serial.print("Received values: ");
+    Serial.print(receive1);
+    Serial.print(", ");
+    Serial.print(receive2);
+    Serial.print(", ");
+    Serial.print(receive3);
+    Serial.print(", ");
+    Serial.print(receive4);
+    Serial.print(", ");
+    Serial.print(receive5);
+    Serial.print(", ");
+    Serial.print(receive6);
+    Serial.print(", ");
+    Serial.println(msg_counter);
+  }
+}
+
+
+void requestEvent() {
+  Serial.println("Data REQUEST from MASTER");
+
+  // Sende Daten an den Master
+  Wire.write(msg_counter);  
+  Wire.write(send1);
+  Wire.write(send2);
+
+  Serial.print("Send data to MASTER:");
+  Serial.print(msg_counter);
+  Serial.print(", ");
+  Serial.print(send1);
+  Serial.print(", ");
+  Serial.println(send2);
+}
+
